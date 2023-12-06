@@ -3,8 +3,7 @@ fn main() {
     let inputs: u32  = read_lines("data/day_02.txt")
         .into_iter()
         .map(|line| parse_game(line))
-        .filter(|game| validate_bags(game.colours, [12,13,14]))
-        .map(|game| game.id)
+        .map(|game| find_power(game))
         .sum();
     println!("{:?}", inputs); 
     // parse inputs into games
@@ -16,6 +15,10 @@ fn main() {
 struct Game {
     id: u32,
     colours: [u8; 3]
+}
+
+fn find_power(game: Game) -> u32 {
+    game.colours.into_iter().map(u32::from).product()
 }
 
 fn parse_game(input: String) -> Game {
