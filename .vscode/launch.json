@@ -1,0 +1,230 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'Advent-23'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=Advent-23",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "Advent-23",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'Advent-23'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=Advent-23",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "Advent-23",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable '1x1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=1x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "1x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable '1x1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=1x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "1x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable '2x2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=2x2",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "2x2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable '2x2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=2x2",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "2x2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable '1x2'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=1x2",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "1x2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable '1x2'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=1x2",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "1x2",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable '2x1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=2x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "2x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable '2x1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=2x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "2x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable '3x1'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=3x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "3x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable '3x1'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=3x1",
+                    "--package=Advent-23"
+                ],
+                "filter": {
+                    "name": "3x1",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
