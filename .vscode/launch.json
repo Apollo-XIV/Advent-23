@@ -7,15 +7,29 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'Advent-23'",
+            "name": "Cargo test",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib"
+                ]
+            },
+            "args": []
+        },
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'advent-23'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=Advent-23",
-                    "--package=Advent-23"
+                    "--bin=advent-23",
+                    "--package=advent-23"
                 ],
                 "filter": {
-                    "name": "Advent-23",
+                    "name": "advent-23",
                     "kind": "bin"
                 }
             },
@@ -25,16 +39,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'Advent-23'",
+            "name": "Debug unit tests in executable 'advent-23'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=Advent-23",
-                    "--package=Advent-23"
+                    "--bin=advent-23",
+                    "--package=advent-23"
                 ],
                 "filter": {
-                    "name": "Advent-23",
+                    "name": "advent-23",
                     "kind": "bin"
                 }
             },
@@ -49,7 +63,7 @@
                 "args": [
                     "build",
                     "--bin=1x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "1x1",
@@ -68,7 +82,7 @@
                     "test",
                     "--no-run",
                     "--bin=1x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "1x1",
@@ -86,7 +100,7 @@
                 "args": [
                     "build",
                     "--bin=2x2",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "2x2",
@@ -105,7 +119,7 @@
                     "test",
                     "--no-run",
                     "--bin=2x2",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "2x2",
@@ -123,7 +137,7 @@
                 "args": [
                     "build",
                     "--bin=1x2",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "1x2",
@@ -142,7 +156,7 @@
                     "test",
                     "--no-run",
                     "--bin=1x2",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "1x2",
@@ -160,7 +174,7 @@
                 "args": [
                     "build",
                     "--bin=2x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "2x1",
@@ -179,7 +193,7 @@
                     "test",
                     "--no-run",
                     "--bin=2x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "2x1",
@@ -197,7 +211,7 @@
                 "args": [
                     "build",
                     "--bin=3x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "3x1",
@@ -216,7 +230,7 @@
                     "test",
                     "--no-run",
                     "--bin=3x1",
-                    "--package=Advent-23"
+                    "--package=advent-23"
                 ],
                 "filter": {
                     "name": "3x1",
