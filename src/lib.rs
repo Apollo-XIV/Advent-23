@@ -11,7 +11,7 @@ pub fn read_lines(filename: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod calendar {
-    use crate::days::day_1x1;
+    use days;
 
     #[test]
     fn day_01() {
@@ -23,6 +23,6 @@ mod calendar {
 
     #[test]
     fn day_04() {
-        assert_eq!(4, 4);
+        part_1_test();
     }
 }
