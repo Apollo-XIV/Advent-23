@@ -8,7 +8,6 @@ pub fn read_lines(filename: &str) -> Vec<String> {
         .collect()  // gather them together into a vector
 }
 
-mod days;
 
 #[cfg(test)]
 mod calendar {

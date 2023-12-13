@@ -1,25 +1,36 @@
 use advent_23::read_lines;
+use std::cmp::min;
 
 fn main() {
-    let out: i32 = read_lines("data/day_04.txt")
+    let card_lib: [Card; 201] = read_lines("data/day_04.txt")
         .into_iter()
-        .map(|card| Card::from(card))
-        .map(|card| card.score())
-        .reduce(|total, c_score| total + c_score).unwrap();
-    println!("{out}")
+        .map(|card| Card::from(card)).collect::<Vec<Card>>().try_into().expect("wrong number of elems");
+    let mut my_cards: Vec<usize> = (1..=201).rev().collect();
+
+    let mut totals: [usize; 201] = [0; 201];
+    while let Some(c_indx) = my_cards.pop() {
+        card_lib[c_indx-1]
+            .get_copies().into_iter()
+            .for_each(|x: usize| my_cards.push(x));
+        totals[c_indx-1] += 1;
+        // println!("processing: {} \t| {} left...", card_lib[c_indx-1].index, my_cards.len())
+    }
+    println!("{:?}", totals.into_iter().sum::<usize>())
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 struct Card {
-    index: i32,
+    index: usize,
     winning_numbers: [i32; 10],
     our_numbers: [i32; 25]
 }
 
 impl Card {
+
+
     fn from(input: String) -> Card {
         let stream: Vec<&str> = input.split(":").flat_map(|string| string.split("|")).collect();
-        let index: i32 = stream
+        let index: usize = stream
             .get(0).expect("stream was empty")[5..]
             .trim().parse()
             .expect("found non integer");
@@ -39,6 +50,20 @@ impl Card {
     }
 
 
+    fn get_copies(&self) -> Vec<usize> {
+        let additional = self.our_numbers.into_iter()
+            .filter(|&x| self.is_winner(x))
+            .collect::<Vec<i32>>().len();
+        if additional == 0 || self.index == 201 {
+            // println!("caller: {} \t| output: None :(", self.index);
+            return vec![]
+        }
+        // println!("caller: {} \t| output: {:?}", self.index, (self.index+1..=(self.index+additional)));
+        let start: usize = min(201, self.index+1);
+        let end = min(201, self.index+additional);
+        (start..=end).collect() // needs to return 201 max on top range
+    }
+
     fn score(&self) -> i32 {
         self.our_numbers.iter()
             .fold(0, |acc, e| {
@@ -51,12 +76,17 @@ impl Card {
     }
 
     fn is_winner(&self, input: i32) -> bool {
-        match self.winning_numbers
-            .iter()
+        match self.winning_numbers.iter()
             .position(|&x| x == input) {
                 Some(_) => true,
                 None => false
         }
+    }
+
+    fn score_len(&self) -> usize {
+        self.our_numbers.iter().copied()
+            .filter(|x| self.is_winner(*x))
+            .collect::<Vec<i32>>().len()
     }
 
     fn parse_number_string(input: &str) -> Vec<i32> {
@@ -68,7 +98,39 @@ impl Card {
 }
 
 #[cfg(test)]
-mod tests_4x1 {
+mod tests_4x2 {
+    #[test]
+    fn scratch() {
+        println!("{:?}",TEST_CARDS[4].score_len());
+
+    }
+
+    #[test]
+    fn getting_card_copies() {
+        let test_copies: [Vec<usize>;5] = [
+            vec![20,21],
+            vec![48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+            vec![49, 50],
+            vec![130],
+            vec![198,199]        
+        ];
+
+        TEST_CARDS
+            .iter()
+            .map(|card| card.get_copies())
+            .zip(test_copies.iter())
+            .for_each(|(input, test)| assert_eq!(input, *test));
+    }
+    
+    #[test]
+    fn parsing() {
+        TEST_INPUTS
+            .iter().copied()
+            .map(|input| Card::from(input.to_string()))
+            .zip(TEST_CARDS.iter().copied())
+            .for_each(|(input, test)| assert_eq!(input, test));
+    }
+
     #[test]
     fn card_scoring() {
         TEST_CARDS
@@ -78,15 +140,9 @@ mod tests_4x1 {
             .for_each(|(input, test)| assert_eq!(input, test))
     }
 
-    #[test]
-    fn parsing() {
-        TEST_INPUTS
-            .iter().copied()
-            .map(|input| Card::from(input.to_string()))
-            .zip(TEST_CARDS.iter().copied())
-            .for_each(|(input, test)| assert_eq!(input, test));
-    }
     use crate::Card;
+
+    
 
     const TEST_INPUTS: [&str; 5] = [
         "Card  19: 87 38 27 92 35 94 88 75 37 74 | 89  7 24 54  9 98 13 42 32 60  8  6 90 35 75 18 68 96 80 59 44 85 95 21 17",
