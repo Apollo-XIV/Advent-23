@@ -1,3 +1,5 @@
+pub mod days;
+
 use std::fs::read_to_string;
 
 pub fn read_lines(filename: &str) -> Vec<String> {
@@ -9,20 +11,25 @@ pub fn read_lines(filename: &str) -> Vec<String> {
 }
 
 
+
 #[cfg(test)]
 mod calendar {
-    use days;
-
-    #[test]
-    fn day_01() {
-        use crate::days::day_1x1::*;
-        day_1x1::run();
-        assert_eq!(4, 4);
-    }
-
-
-    #[test]
-    fn day_04() {
-        part_1_test();
+    use super::*;
+    
+    // #[test]
+    // fn day_01() {
+        //     use crate::days::day_1x1::*;
+        //     day_1x1::run();
+        //     assert_eq!(4, 4);
+        // }
+        
+        
+        #[test]
+        fn day_04() {
+            use days::day_04::tests::*;
+            part_1_test();
+            part_2_test();    
     }
 }
+
+

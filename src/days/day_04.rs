@@ -1,13 +1,13 @@
-use advent_23::read_lines;
+use crate::read_lines;
 use std::cmp::min;
 
-fn part_1(cards: &[Card;201]) -> usize {
+pub fn part_1(cards: &[Card;201]) -> usize {
     cards.iter()
         .map(|card| card.score())
         .sum()
 }
 
-fn part_2(cards: &[Card;201]) -> usize {
+pub fn part_2(cards: &[Card;201]) -> usize {
     let mut totals: [usize; 201] = [1; 201];
     for i in 0..201 {
         cards[i].copies.iter()
@@ -16,15 +16,8 @@ fn part_2(cards: &[Card;201]) -> usize {
     totals.into_iter().sum()
 }
 
-fn main() {
-    let cards: [Card; 201] = read_lines("data/day_04.txt").into_iter()
-        .map(|input| Card::from(input)).collect::<Vec<Card>>().try_into().expect("wrong number of items");
-    part_1(&cards);
-    part_2(&cards);
-}
-
 #[derive(Debug, PartialEq, Eq)]
-struct Card {
+pub struct Card {
     matches: Vec<usize>,
     copies: Vec<usize>
 }
@@ -56,14 +49,23 @@ impl Card {
     }
 }
 
+pub fn gen_card_lib() -> [Card; 201] {
+    read_lines("data/day_04.txt").into_iter()
+    .map(|input| Card::from(input)).collect::<Vec<Card>>().try_into().expect("wrong number of items")
+}
 
 #[cfg(test)]
-mod day_04 {
+pub mod tests {
     use super::*;
 
-    fn gen_card_lib() -> [Card; 201] {
-        read_lines("data/day_04.txt").into_iter()
-        .map(|input| Card::from(input)).collect::<Vec<Card>>().try_into().expect("wrong number of items")
+    #[test]
+    pub fn part_1_test() {
+        assert_eq!(part_1(&gen_card_lib()), 20855);
+    }
+    
+    #[test]
+    pub fn part_2_test() {
+        assert_eq!(part_2(&gen_card_lib()), 5489600);
     }
 
     fn gen_test_cards() -> [Card; 5] {
@@ -99,17 +101,7 @@ mod day_04 {
             .zip(TEST_SCORES.iter().copied())
             .for_each(|(input, test)| assert_eq!(input, test))
     }
-
-    #[test]
-    pub fn part_1_test() {
-        assert_eq!(part_1(&gen_card_lib()), 20855);
-    }
-
-    #[test]
-    fn part_2_test() {
-        assert_eq!(part_2(&gen_card_lib()), 5489600);
-    }
-
+    
     #[test]
     fn parsing() {
         TEST_INPUTS
@@ -118,6 +110,7 @@ mod day_04 {
             .zip(gen_test_cards().into_iter())
             .for_each(|(input, test)| assert_eq!(input, test));
     }
+    
     const TEST_INPUTS: [&str; 5] = [
         "Card  19: 87 38 27 92 35 94 88 75 37 74 | 89  7 24 54  9 98 13 42 32 60  8  6 90 35 75 18 68 96 80 59 44 85 95 21 17",
         "Card  47: 72 37 74 81 14  3 29 77  5 49 |  5 88 89 81 37 14 71 95 63 54 49 24 67 62 77 29 72 92 39 80 60 74 59  3 93",
