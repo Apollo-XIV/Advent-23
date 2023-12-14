@@ -4,20 +4,20 @@ fn main() {
     let lines = read_lines("data/day_05.txt");
 }
 
-pub fn part_1() {
-}
+pub fn part_1() {}
 
-pub fn part_2() {
-}
+pub fn part_2() {}
 
 pub struct Map {
-    from: String,
-    to: String,
-
+    range: Range<u32>,
+    diff: i32,
 }
 impl Map {
     fn from() -> Map {
-        Map { from: String::from("test"), to: String::from("test")}
+        Map {
+            from: (0..100),
+            to: String::from("test"),
+        }
     }
 }
 
@@ -34,14 +34,13 @@ pub mod tests {
     pub fn part_1_test() {
         assert_eq!(part_1(), ());
     }
-    
+
     #[test]
     pub fn part_2_test() {
         assert_eq!(part_2(), ());
     }
 
-    const TEST_INPUT: str = 
-"seeds: 79 14 55 13
+    const TEST_INPUT: str = "seeds: 79 14 55 13
 
 seed-to-soil map:
 50 98 2

@@ -13,3 +13,7 @@ winnow = "0.5.26"
 [[bench]]
 name = "day_04"
 harness = false
+
+[[bench]]
+name = "day_05"
+harness = false
