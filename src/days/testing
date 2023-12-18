@@ -1,0 +1,32 @@
+RUNNING THROUGH CON_B:ConversionBlock([
+    Conversion { range: 77..100, diff: -32 }, 
+    Conversion { range: 45..64, diff: 36 }, 
+    Conversion { range: 64..77, diff: 4 }
+])
+QUEUE: [74..88]
+cmp: 74..88
+matches: [77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87]
+misses: [74, 75, 76]
+NEW_RANGE: [45..56, 74..77]
+cmp: 45..56
+matches: [45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55]
+misses: []
+NEW_RANGE: [81..92]
+cmp: 81..92
+matches: []
+misses: [81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91]
+NEW_RANGE: [81..92]
+CURRENT: 81..92
+cmp: 74..77
+matches: []
+misses: [74, 75, 76]
+NEW_RANGE: [74..77]
+cmp: 74..77
+matches: []
+misses: [74, 75, 76]
+NEW_RANGE: [74..77]
+cmp: 74..77
+matches: [74, 75, 76]
+misses: []
+NEW_RANGE: [78..81]
+CURRENT: 78..81
