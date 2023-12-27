@@ -9,9 +9,9 @@ fn parse_input(string: &str) -> (Vec<i64>, Vec<ConversionBlock>) {
         .map(|x| x.parse().expect(x))
         .collect();
     let maps = iter.map(|x: &str| ConversionBlock(x
-            .split("\n")
+            .split('\n')
             .skip(1)
-            .map(|line| Conversion::from(line))
+            .map(Conversion::from)
             .collect::<Vec<Conversion>>())
         )
         .collect::<Vec<ConversionBlock>>();
@@ -22,30 +22,19 @@ pub fn part_1() -> i64 {
     let input = read_lines("data/day_05.txt").join("\n");
     let (seeds, map_blocks) = parse_input(&input);
     seeds
+    .iter()
+    .map(|&seed| map_blocks
         .iter()
-        .map(|&seed| map_blocks
-            .iter()
-            .fold(seed, |acc, e| e.convert(acc)))
+        .fold(seed, |acc, e| e.convert(acc)))
         .min().expect("couldnt find minimum value")
 }
-
+    
 pub fn part_2() -> i64{
     let input = read_lines("data/day_05.txt").join("\n");
     let (seeds, map_blocks) = parse_input(&input);
-    let seeds = parse_seeds(seeds);
-    let mut outputs: Vec<i64> = vec![];
-    for mut seed in seeds {
-        for conversion_block in map_blocks.iter() {
-            conversion_block.convert_range(&mut seed);
-
-
-
-
-
-        }
-    }
-    *outputs.iter().min().expect("ah")
-    
+    let seeds: SeedBlock = parse_seeds(seeds);
+    println!("{:?}", seeds);
+    1
 }
 
 #[derive(Debug)]
@@ -58,37 +47,18 @@ impl ConversionBlock {
             None => input
         }
     }
-
+    
     // fn that converts a given set of seed ranges through a conversion block
     // the conversion block handles running each seed range through each conversion
-    fn convert_range(&self, input: &mut SeedBlock) -> SeedBlock {
-        let mut unconverted = input.0.clone();
-        println!("{:?}", unconverted);
+    fn convert_set(&self, input: &mut SeedBlock) {
+        let mut outputs: Vec<SeedBlock> = vec![];
+        // for each layer of the conversion block (each conversion)
+        for conversion in self.0.iter() {
+            outputs.push(conversion.convert(input));
+        };
 
-
-
-        SeedBlock(vec![])
-    }
-
-}
-
-#[derive(Clone, Debug)]
-pub struct SeedBlock(Vec<Range<i64>>);
-impl SeedBlock {
-    fn from(input: Range<i64>) -> SeedBlock {
-        SeedBlock(vec![input])
     }
 }
-
-fn parse_seeds(input: Vec<i64>) -> Vec<SeedBlock> {
-    input
-    .into_iter()
-    .tuples()
-    .map(|(k, k2)| SeedBlock::from(k..k+k2))
-    .collect()
-}
-
-
 
 #[derive(Debug)]
 pub struct Conversion {
@@ -97,7 +67,6 @@ pub struct Conversion {
 }
 
 impl Conversion {
-
     /// Converts a reference to a string into a Conversion struct
     fn from(input: &str) -> Conversion {
         let mut parts = input
@@ -113,8 +82,63 @@ impl Conversion {
             diff: dest_start-source_start
         }
     }
+
+    /// Converts any applicable ranges in the seedblock, sperating them out into the return type.
+    fn convert(&self, seeds: &mut SeedBlock) -> SeedBlock {
+        let mut output: Vec<Range<i64>> = vec![];
+        for seed in seeds.0.iter_mut() {
+            match seed.extract(&self.range) {
+                Some(mut x) => {x.map_diff(self.diff); output.push(x)},
+                None => continue,
+            }
+        };
+        SeedBlock(output)
+    }
 }
 
+#[derive(Clone, Debug)]
+pub struct SeedBlock(Vec<Range<i64>>);
+impl SeedBlock {
+    fn from(input: Range<i64>) -> SeedBlock {
+        SeedBlock(vec![input])
+    }
+}
+
+fn parse_seeds(input: Vec<i64>) -> SeedBlock {
+    SeedBlock(input
+        .into_iter()
+        .tuples()
+        .map(|(k, k2)| k..k+k2)
+        .collect())
+}
+
+
+trait SeedRange {
+    /// Alters a range to shift it by a given amount.
+    fn map_diff(&mut self, diff: i64);
+    /// Returns a boolean for whether a range overlaps with another.
+    fn overlaps(&self, range: &Range<i64>) -> bool;
+    /// Takes a range and returns the overlapping range, removing them from the original one
+    fn extract(&mut self, range: &Range<i64>) -> Option<Range<i64>>;
+}
+
+impl SeedRange for Range<i64> {
+    fn map_diff(&mut self, diff: i64) {
+        self.start += diff;
+        self.end += diff;
+    }
+
+    fn overlaps(&self, range: &Range<i64>) -> bool {
+        !((self.end < range.start) || (self.start > range.end))
+    }
+
+    fn extract(&mut self, range: &Range<i64>) -> Option<Range<i64>> {
+        if !self.overlaps(range) {return None}; // early return for no overlap
+        return Some(0..1)
+    }
+}
+
+/// Takes a vec and converts it to find the maximum and minimum values
 fn vec_to_range(input: Vec<i64>) -> Option<Range<i64>> {
     if let (Some(min), Some(max)) = (input.iter().min(), input.iter().max()) {
         Some(min.to_owned()..max.to_owned()+1)
@@ -128,25 +152,30 @@ pub mod tests {
     use super::*;
 
     #[test]
-    fn converting_ranges() {
-        let conversion = Conversion {
-            range: 50..82,
-            diff: 2
-        };
-        println!("{:?}", conversion.convert_range(79..93));
+    fn overlapping_ranges() {
+        let ranges = vec![
+            0..15,
+            1..2,
+            2..3
+        ];
+        assert_eq!((0..14).overlaps(&(7..23)), true);
+        assert_eq!((70..98).overlaps(&(7..23)), false);
     }
+
+    // #[test]
+    // fn converting_ranges() {
+    //     let conversion = Conversion {
+    //         range: 50..82,
+    //         diff: 2
+    //     };
+    //     println!("{:?}", conversion.convert_range(79..93));
+    // }
     
     #[test]
     fn scratch() {
         let (seeds, map_blocks) = parse_input(&TEST_INPUT);
-        let seeds = parse_seeds(vec![79,14]);
-        println!("TESTING ON: {:?}",seeds);
-        let mut outputs: Vec<i64> = vec![];
-        for mut seed in seeds {
-            outputs.push(seed.convert_through_min(&map_blocks))
-        }
-        println!("{:?}",outputs);
-
+        let mut seeds = parse_seeds(vec![79,14]);
+        
     }
 
     #[test]
