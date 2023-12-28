@@ -1,150 +1,142 @@
 use crate::read_lines;
+use std::{ops::Range, cmp::{min, max}};
 use itertools::Itertools;
-use std::ops::Range;
 
-fn parse_input(string: &str) -> (Vec<i64>, Vec<ConversionBlock>) {
-    let mut iter = string.split("\n\n");
-    let seeds = iter.next().expect("EMPTY :(")[6..]
-        .split_ascii_whitespace()
-        .map(|x| x.parse().expect(x))
-        .collect();
-    let maps = iter.map(|x: &str| ConversionBlock(x
-            .split('\n')
-            .skip(1)
-            .map(Conversion::from)
-            .collect::<Vec<Conversion>>())
+pub fn part_1() -> i64{
+    let input = read_lines("data/day_05.txt").join("\n");
+    let (seeds, maps) = parse_input(&input);
+    seeds.iter()
+        .map(|&seed| maps
+            .iter()
+            .fold(seed, |seed, map| map.convert_int(seed))
         )
-        .collect::<Vec<ConversionBlock>>();
-    (seeds, maps)
+        .min().expect("Couldn't find a minimum value")
+    //println!("{:?}", result);
 }
 
-pub fn part_1() -> i64 {
+pub fn part_2() -> i64 {
     let input = read_lines("data/day_05.txt").join("\n");
-    let (seeds, map_blocks) = parse_input(&input);
-    seeds
-    .iter()
-    .map(|&seed| map_blocks
+    let (seeds, maps) = parse_input(&input);
+    let seed_ranges = parse_seeds(seeds);
+    maps.iter()
+        .fold(seed_ranges, |seed_ranges, map| {
+            seed_ranges.into_iter()
+                .flat_map(|seed_range| map.convert_range(seed_range))
+                .collect()
+        })
         .iter()
-        .fold(seed, |acc, e| e.convert(acc)))
-        .min().expect("couldnt find minimum value")
-}
-    
-pub fn part_2() -> i64{
-    let input = read_lines("data/day_05.txt").join("\n");
-    let (seeds, map_blocks) = parse_input(&input);
-    let seeds: SeedBlock = parse_seeds(seeds);
-    println!("{:?}", seeds);
-    1
+        .map(|range| range.start)
+        .min().expect("failed to find min")
+    //println!("{:?}", min);
 }
 
 #[derive(Debug)]
-pub struct ConversionBlock(Vec<Conversion>);
-impl ConversionBlock {
-    fn convert(&self, input: i64) -> i64 {
-        match self.0.iter()
-            .find(|&x| x.range.contains(&input)){
+/// A collection of non-overlapping conversions.
+struct Map(Vec<Conv>);
+
+impl FromIterator<Conv> for Map {
+    fn from_iter<T: IntoIterator<Item = Conv>>(iter: T) -> Self {
+        let mut map = iter.into_iter()
+            .collect::<Vec<Conv>>();
+        map.sort_by_key(|x| x.range.start);
+        map.insert(0, Conv::null(i64::MIN..i64::MIN));
+        map.push(Conv::null(i64::MAX..i64::MAX));
+        map = intersperse_ranges(map);
+        map.remove(0);
+        map.pop();
+        Map(map)
+    }
+}
+
+fn intersperse_ranges(map: Vec<Conv>) -> Vec<Conv> {
+    let mut result: Vec<Conv> = Vec::new();
+
+    // Iterate through each range
+    for conv in map {
+        // Fill the gap before the current range
+        if let Some(last) = result.last().cloned() {
+            if last.range.end < conv.range.start {
+                result.push(Conv::null(last.range.end..conv.range.start));
+            }
+        }
+
+        // Insert the current range
+        result.push(conv);
+    }
+
+    result
+}
+
+impl Map {
+    fn convert_int(&self, input: i64) -> i64{
+        match self.0.iter().find(|&conv| conv.range.contains(&input)) {
             Some(x) => x.diff + input,
             None => input
         }
     }
-    
-    // fn that converts a given set of seed ranges through a conversion block
-    // the conversion block handles running each seed range through each conversion
-    fn convert_set(&self, input: &mut SeedBlock) {
-        let mut outputs: Vec<SeedBlock> = vec![];
-        // for each layer of the conversion block (each conversion)
-        for conversion in self.0.iter() {
-            outputs.push(conversion.convert(input));
-        };
 
+    fn convert_range(&self, seed_range: Range<i64>) -> Vec<Range<i64>> {
+        self.0.iter()
+            .filter_map(|conv| conv.apply_on_intersection(&seed_range))
+            .collect()
     }
 }
 
-#[derive(Debug)]
-pub struct Conversion {
+#[derive(Debug, Clone)]
+struct Conv {
     range: Range<i64>,
-    diff: i64,
+    diff: i64
 }
-
-impl Conversion {
-    /// Converts a reference to a string into a Conversion struct
-    fn from(input: &str) -> Conversion {
-        let mut parts = input
-            .split_ascii_whitespace()
-            .map(|x| x.parse().expect("INVALID INPUT"))
-            .collect::<Vec<i64>>();
-        let source_range = parts.pop().expect("INVALID NUMBER OF INPUTS");
-        let source_start = parts.pop().expect("INVALID NUMBER OF INPUTS");
-        let dest_start = parts.pop().expect("INVALID NUMBER OF INPUTS");
-        
-        Conversion {
-            range: (source_start..source_start+source_range),
-            diff: dest_start-source_start
+impl Conv {
+    fn null(range: Range<i64>) -> Conv {
+        Conv {
+            range: range,
+            diff: 0
         }
     }
 
-    /// Converts any applicable ranges in the seedblock, sperating them out into the return type.
-    fn convert(&self, seeds: &mut SeedBlock) -> SeedBlock {
-        let mut output: Vec<Range<i64>> = vec![];
-        for seed in seeds.0.iter_mut() {
-            match seed.extract(&self.range) {
-                Some(mut x) => {x.map_diff(self.diff); output.push(x)},
-                None => continue,
-            }
-        };
-        SeedBlock(output)
+    fn from(input: &str) -> Conv {
+        let [dest, source, range]: [i64;3] = input
+            .split_ascii_whitespace()
+            .map(|x| x.parse().expect("INVALID INPUT"))
+            .collect::<Vec<i64>>().try_into().expect("Invalid Number of Inputs");
+        
+        Conv {
+            range: (source..source+range),
+            diff: dest-source
+        }
+    }
+
+    fn apply_on_intersection(&self, range: &Range<i64>) -> Option<Range<i64>> {
+        if range.end < self.range.start || range.start > self.range.end {return None}
+        let start = max(range.start, self.range.start) + self.diff;
+        let end = min(range.end, self.range.end) + self.diff;
+        Some(start..end)
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct SeedBlock(Vec<Range<i64>>);
-impl SeedBlock {
-    fn from(input: Range<i64>) -> SeedBlock {
-        SeedBlock(vec![input])
-    }
+fn parse_input(string: &str) -> (Vec<i64>, Vec<Map>) {
+    let mut iter = string.split("\n\n");
+    let seeds = iter.next().expect("EMPTY :(")[6..] // start reading from 6 chars in
+        .split_ascii_whitespace()
+        .map(|x| x.parse().expect(&format!("invalid character: {}",x)))
+        .collect();
+    let maps = iter.map(|x: &str| x
+            .split('\n')
+            .skip(1)
+            .map(Conv::from)
+            .collect()
+        )
+        .collect();
+    (seeds, maps)
 }
 
-fn parse_seeds(input: Vec<i64>) -> SeedBlock {
-    SeedBlock(input
+fn parse_seeds(input: Vec<i64>) -> Vec<Range<i64>> {
+    input
         .into_iter()
         .tuples()
         .map(|(k, k2)| k..k+k2)
-        .collect())
-}
-
-
-trait SeedRange {
-    /// Alters a range to shift it by a given amount.
-    fn map_diff(&mut self, diff: i64);
-    /// Returns a boolean for whether a range overlaps with another.
-    fn overlaps(&self, range: &Range<i64>) -> bool;
-    /// Takes a range and returns the overlapping range, removing them from the original one
-    fn extract(&mut self, range: &Range<i64>) -> Option<Range<i64>>;
-}
-
-impl SeedRange for Range<i64> {
-    fn map_diff(&mut self, diff: i64) {
-        self.start += diff;
-        self.end += diff;
-    }
-
-    fn overlaps(&self, range: &Range<i64>) -> bool {
-        !((self.end < range.start) || (self.start > range.end))
-    }
-
-    fn extract(&mut self, range: &Range<i64>) -> Option<Range<i64>> {
-        if !self.overlaps(range) {return None}; // early return for no overlap
-        return Some(0..1)
-    }
-}
-
-/// Takes a vec and converts it to find the maximum and minimum values
-fn vec_to_range(input: Vec<i64>) -> Option<Range<i64>> {
-    if let (Some(min), Some(max)) = (input.iter().min(), input.iter().max()) {
-        Some(min.to_owned()..max.to_owned()+1)
-    } else {
-        None
-    }
+        .collect()
 }
 
 #[cfg(test)]
@@ -152,56 +144,68 @@ pub mod tests {
     use super::*;
 
     #[test]
-    fn overlapping_ranges() {
-        let ranges = vec![
-            0..15,
-            1..2,
-            2..3
-        ];
-        assert_eq!((0..14).overlaps(&(7..23)), true);
-        assert_eq!((70..98).overlaps(&(7..23)), false);
-    }
-
-    // #[test]
-    // fn converting_ranges() {
-    //     let conversion = Conversion {
-    //         range: 50..82,
-    //         diff: 2
-    //     };
-    //     println!("{:?}", conversion.convert_range(79..93));
-    // }
-    
-    #[test]
     fn scratch() {
-        let (seeds, map_blocks) = parse_input(&TEST_INPUT);
-        let mut seeds = parse_seeds(vec![79,14]);
-        
-    }
-
-    #[test]
-    fn example_input() {
-        let (seeds, map_blocks) = parse_input(TEST_INPUT);
-        seeds
-            .iter()
-            .map(|&seed| map_blocks
+        let input = read_lines("data/day_05.txt").join("\n");
+        let (seeds, maps) = parse_input(&input);
+        let result = seeds.iter()
+            .map(|&seed| maps
                 .iter()
-                .fold(seed, |acc, e| e.convert(acc)))
-            .zip(TEST_OUTPUTS.iter())
-            .for_each(|(input, &test)| assert_eq!(input, test));
+                .fold(seed, |seed, map| map.convert_int(seed))
+            )
+            .min().expect("Couldn't find a minimum value");
+
+        println!("{:?}", result);
     }
 
     #[test]
-    pub fn part_1_test() {
+    fn part_1_test() {
         assert_eq!(part_1(), 322500873);
     }
 
     #[test]
-    pub fn part_2_test() {
-        println!("{:?}", part_2())
-        // assert_eq!(part_2(), ());
+    fn part_2_test() {
+        assert_eq!(part_2(), 108956227);
     }
 
-    const TEST_OUTPUTS: [i64; 4] = [82, 43, 86, 35];
+    #[test]
+    fn test_input() {
+        let (seeds, maps) = parse_input(TEST_INPUT);
+        let result = seeds.iter()
+            .map(|&seed| maps
+                .iter()
+                .fold(seed, |seed, map| map.convert_int(seed))
+            )
+            .min().expect("Couldn't find a minimum value");
+
+        println!("{:?}", result);
+    }
+
+    #[test]
+    fn test_input_part_2() {
+        let (seeds, maps) = parse_input(TEST_INPUT);
+        let seed_ranges = parse_seeds(seeds);
+        println!("seeds: {:?} \nmaps: {:?}", seed_ranges, maps);
+        let min = maps.iter()
+            .fold(seed_ranges, |seed_ranges, map| {
+                dbg!(&seed_ranges);
+                let result = seed_ranges.into_iter()
+                    .flat_map(|seed_range| map.convert_range(seed_range))
+                    .collect();
+                result
+            })
+            .iter()
+            .map(|x|x.start)
+            .min().expect("couldn't find a min");
+            
+        println!("{:?}", min);
+    }
+
+    #[test]
+    fn parsing_inputs() {
+        let (seeds, maps) = parse_input(TEST_INPUT);
+        println!("{:?}", maps);
+        assert_eq!(seeds,[79, 14, 55, 13]);
+    }
 
     const TEST_INPUT: &str = "seeds: 79 14 55 13
 
@@ -235,8 +239,5 @@ temperature-to-humidity map:
 
 humidity-to-location map:
 60 56 37
-56 93 4
-
-";
+56 93 4";
 }
-
