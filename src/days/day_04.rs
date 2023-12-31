@@ -32,8 +32,8 @@ impl Card {
         };
 
         let [index, wants, haves]: [&str; 3] = input
-            .split(":")
-            .flat_map(|string| string.split("|"))
+            .split(':')
+            .flat_map(|string| string.split('|'))
             .collect::<Vec<&str>>()
             .try_into()
             .expect("failed to parse)");
@@ -44,7 +44,7 @@ impl Card {
             - 1;
         let matches: Vec<usize> = parse(haves)
             .into_iter()
-            .filter(|&x| parse(wants).iter().position(|&y| x == y).is_some())
+            .filter(|&x| parse(wants).iter().any(|&y| x == y))
             .collect();
 
         let start = min(200, index + 1);
@@ -69,7 +69,7 @@ impl Card {
 pub fn gen_card_lib() -> [Card; 201] {
     read_lines("data/day_04.txt")
         .into_iter()
-        .map(|input| Card::from(input))
+        .map(Card::from)
         .collect::<Vec<Card>>()
         .try_into()
         .expect("wrong number of items")

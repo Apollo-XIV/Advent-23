@@ -93,10 +93,7 @@ struct Conv {
 }
 impl Conv {
     fn null(range: Range<i64>) -> Conv {
-        Conv {
-            range: range,
-            diff: 0,
-        }
+        Conv { range, diff: 0 }
     }
 
     fn from(input: &str) -> Conv {
@@ -127,7 +124,7 @@ fn parse_input(string: &str) -> (Vec<i64>, Vec<Map>) {
     let mut iter = string.split("\n\n");
     let seeds = iter.next().expect("EMPTY :(")[6..] // start reading from 6 chars in
         .split_ascii_whitespace()
-        .map(|x| x.parse().expect(&format!("invalid character: {}", x)))
+        .map(|x| x.parse().unwrap())
         .collect();
     let maps = iter
         .map(|x: &str| x.split('\n').skip(1).map(Conv::from).collect())

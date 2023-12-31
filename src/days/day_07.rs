@@ -97,7 +97,7 @@ impl Ord for Hand {
             match self
                 .cards
                 .into_iter()
-                .zip(other.cards.into_iter())
+                .zip(other.cards)
                 .find(|(a, b)| a != b)
             {
                 // find first occurance where a isnt equal to b
@@ -132,7 +132,7 @@ impl PokerHand for [i8; 5] {
     }
 
     fn is_two_pair(&self) -> bool {
-        self.into_iter()
+        self.iter()
             .copied()
             .filter(|&x| self.count_of(x) == 2)
             .count()
@@ -141,10 +141,8 @@ impl PokerHand for [i8; 5] {
     }
 
     fn is_full_house(&self) -> bool {
-        let (group_a, group_b): (Vec<i8>, Vec<i8>) = self
-            .into_iter()
-            .copied()
-            .partition(|&x| self.count_of(x) == 3);
+        let (group_a, group_b): (Vec<i8>, Vec<i8>) =
+            self.iter().copied().partition(|&x| self.count_of(x) == 3);
         let groups_are_right_length = group_a.len() == 3;
         let group_b_is_homogenous = group_b.iter().all(|&x| x == group_b[0]);
         groups_are_right_length && group_b_is_homogenous
@@ -160,7 +158,7 @@ impl PokerHand for [i8; 5] {
 
     /// replaces all wildcard values with the insert
     fn wildcard(&self, insert: i8) -> [i8; 5] {
-        self.into_iter()
+        self.iter()
             .copied()
             .map(|value| match value {
                 11 => insert,
