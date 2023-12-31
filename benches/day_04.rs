@@ -1,5 +1,5 @@
-use criterion::{criterion_group, criterion_main, Criterion};
 use advent_23::days::day_04::*;
+use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn part_1_bench(c: &mut Criterion) {
     c.bench_function("part 1", |b| b.iter(|| part_1(&gen_card_lib())));

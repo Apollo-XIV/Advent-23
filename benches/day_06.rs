@@ -1,4 +1,4 @@
-use advent_23::days::day_05::*;
+use advent_23::days::day_06::*;
 use criterion::{criterion_group, criterion_main, Criterion};
 
 pub fn part_1_bench(c: &mut Criterion) {

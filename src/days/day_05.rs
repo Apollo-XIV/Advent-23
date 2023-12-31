@@ -1,16 +1,18 @@
 use crate::read_lines;
-use std::{ops::Range, cmp::{min, max}};
 use itertools::Itertools;
+use std::{
+    cmp::{max, min},
+    ops::Range,
+};
 
-pub fn part_1() -> i64{
+pub fn part_1() -> i64 {
     let input = read_lines("data/day_05.txt").join("\n");
     let (seeds, maps) = parse_input(&input);
-    seeds.iter()
-        .map(|&seed| maps
-            .iter()
-            .fold(seed, |seed, map| map.convert_int(seed))
-        )
-        .min().expect("Couldn't find a minimum value")
+    seeds
+        .iter()
+        .map(|&seed| maps.iter().fold(seed, |seed, map| map.convert_int(seed)))
+        .min()
+        .expect("Couldn't find a minimum value")
     //println!("{:?}", result);
 }
 
@@ -20,13 +22,15 @@ pub fn part_2() -> i64 {
     let seed_ranges = parse_seeds(seeds);
     maps.iter()
         .fold(seed_ranges, |seed_ranges, map| {
-            seed_ranges.into_iter()
+            seed_ranges
+                .into_iter()
                 .flat_map(|seed_range| map.convert_range(seed_range))
                 .collect()
         })
         .iter()
         .map(|range| range.start)
-        .min().expect("failed to find min")
+        .min()
+        .expect("failed to find min")
     //println!("{:?}", min);
 }
 
@@ -36,8 +40,7 @@ struct Map(Vec<Conv>);
 
 impl FromIterator<Conv> for Map {
     fn from_iter<T: IntoIterator<Item = Conv>>(iter: T) -> Self {
-        let mut map = iter.into_iter()
-            .collect::<Vec<Conv>>();
+        let mut map = iter.into_iter().collect::<Vec<Conv>>();
         map.sort_by_key(|x| x.range.start);
         map.insert(0, Conv::null(i64::MIN..i64::MIN));
         map.push(Conv::null(i64::MAX..i64::MAX));
@@ -68,15 +71,16 @@ fn intersperse_ranges(map: Vec<Conv>) -> Vec<Conv> {
 }
 
 impl Map {
-    fn convert_int(&self, input: i64) -> i64{
+    fn convert_int(&self, input: i64) -> i64 {
         match self.0.iter().find(|&conv| conv.range.contains(&input)) {
             Some(x) => x.diff + input,
-            None => input
+            None => input,
         }
     }
 
     fn convert_range(&self, seed_range: Range<i64>) -> Vec<Range<i64>> {
-        self.0.iter()
+        self.0
+            .iter()
             .filter_map(|conv| conv.apply_on_intersection(&seed_range))
             .collect()
     }
@@ -85,30 +89,34 @@ impl Map {
 #[derive(Debug, Clone)]
 struct Conv {
     range: Range<i64>,
-    diff: i64
+    diff: i64,
 }
 impl Conv {
     fn null(range: Range<i64>) -> Conv {
         Conv {
             range: range,
-            diff: 0
+            diff: 0,
         }
     }
 
     fn from(input: &str) -> Conv {
-        let [dest, source, range]: [i64;3] = input
+        let [dest, source, range]: [i64; 3] = input
             .split_ascii_whitespace()
             .map(|x| x.parse().expect("INVALID INPUT"))
-            .collect::<Vec<i64>>().try_into().expect("Invalid Number of Inputs");
-        
+            .collect::<Vec<i64>>()
+            .try_into()
+            .expect("Invalid Number of Inputs");
+
         Conv {
-            range: (source..source+range),
-            diff: dest-source
+            range: (source..source + range),
+            diff: dest - source,
         }
     }
 
     fn apply_on_intersection(&self, range: &Range<i64>) -> Option<Range<i64>> {
-        if range.end < self.range.start || range.start > self.range.end {return None}
+        if range.end < self.range.start || range.start > self.range.end {
+            return None;
+        }
         let start = max(range.start, self.range.start) + self.diff;
         let end = min(range.end, self.range.end) + self.diff;
         Some(start..end)
@@ -119,14 +127,10 @@ fn parse_input(string: &str) -> (Vec<i64>, Vec<Map>) {
     let mut iter = string.split("\n\n");
     let seeds = iter.next().expect("EMPTY :(")[6..] // start reading from 6 chars in
         .split_ascii_whitespace()
-        .map(|x| x.parse().expect(&format!("invalid character: {}",x)))
+        .map(|x| x.parse().expect(&format!("invalid character: {}", x)))
         .collect();
-    let maps = iter.map(|x: &str| x
-            .split('\n')
-            .skip(1)
-            .map(Conv::from)
-            .collect()
-        )
+    let maps = iter
+        .map(|x: &str| x.split('\n').skip(1).map(Conv::from).collect())
         .collect();
     (seeds, maps)
 }
@@ -135,7 +139,7 @@ fn parse_seeds(input: Vec<i64>) -> Vec<Range<i64>> {
     input
         .into_iter()
         .tuples()
-        .map(|(k, k2)| k..k+k2)
+        .map(|(k, k2)| k..k + k2)
         .collect()
 }
 
@@ -147,12 +151,11 @@ pub mod tests {
     fn scratch() {
         let input = read_lines("data/day_05.txt").join("\n");
         let (seeds, maps) = parse_input(&input);
-        let result = seeds.iter()
-            .map(|&seed| maps
-                .iter()
-                .fold(seed, |seed, map| map.convert_int(seed))
-            )
-            .min().expect("Couldn't find a minimum value");
+        let result = seeds
+            .iter()
+            .map(|&seed| maps.iter().fold(seed, |seed, map| map.convert_int(seed)))
+            .min()
+            .expect("Couldn't find a minimum value");
 
         println!("{:?}", result);
     }
@@ -170,12 +173,11 @@ pub mod tests {
     #[test]
     fn test_input() {
         let (seeds, maps) = parse_input(TEST_INPUT);
-        let result = seeds.iter()
-            .map(|&seed| maps
-                .iter()
-                .fold(seed, |seed, map| map.convert_int(seed))
-            )
-            .min().expect("Couldn't find a minimum value");
+        let result = seeds
+            .iter()
+            .map(|&seed| maps.iter().fold(seed, |seed, map| map.convert_int(seed)))
+            .min()
+            .expect("Couldn't find a minimum value");
 
         println!("{:?}", result);
     }
@@ -185,18 +187,21 @@ pub mod tests {
         let (seeds, maps) = parse_input(TEST_INPUT);
         let seed_ranges = parse_seeds(seeds);
         println!("seeds: {:?} \nmaps: {:?}", seed_ranges, maps);
-        let min = maps.iter()
+        let min = maps
+            .iter()
             .fold(seed_ranges, |seed_ranges, map| {
                 dbg!(&seed_ranges);
-                let result = seed_ranges.into_iter()
+                let result = seed_ranges
+                    .into_iter()
                     .flat_map(|seed_range| map.convert_range(seed_range))
                     .collect();
                 result
             })
             .iter()
-            .map(|x|x.start)
-            .min().expect("couldn't find a min");
-            
+            .map(|x| x.start)
+            .min()
+            .expect("couldn't find a min");
+
         println!("{:?}", min);
     }
 
@@ -204,7 +209,7 @@ pub mod tests {
     fn parsing_inputs() {
         let (seeds, maps) = parse_input(TEST_INPUT);
         println!("{:?}", maps);
-        assert_eq!(seeds,[79, 14, 55, 13]);
+        assert_eq!(seeds, [79, 14, 55, 13]);
     }
 
     const TEST_INPUT: &str = "seeds: 79 14 55 13
